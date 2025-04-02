@@ -27,7 +27,7 @@ public:
 
 	int currentBufferIndex{ 0 };
 
-	unsigned int _particleCount{200};
+	unsigned int _particleCount{1200};
 
 	void update();
 
@@ -45,9 +45,9 @@ private:
 	bool once{ false };
 
 	glm::fvec2 bottomWall = glm::fvec2(0, 0);
-	glm::fvec2 rightWall = glm::fvec2(1920, 0);
+	glm::fvec2 rightWall = glm::fvec2(3840, 0);
 	glm::fvec2 leftWall = glm::fvec2(0, 0);
-	glm::fvec2 topWall = glm::fvec2(0, 1080);
+	glm::fvec2 topWall = glm::fvec2(0, 2160);
 
 	void calculateGravity();
 	void particleCollisionTest(Particle& particle, unsigned int i);

@@ -10,17 +10,19 @@ ParticleSystem::ParticleSystem()
 	auto& drawingBuffer = _particleBuffers[0];
 
 	float gap = 5.0f;
-	float yOffset = 1080 / 2.0f;
+	float yOffset = 2560 / 2.0f;
 	int maxwidth = 80.0;
 
 	float size = Particle().size;
 
 	float ballsTotalWidth = (maxwidth * size) + ((maxwidth - 1) * gap);
 
-	float xOffset = (1920 - ballsTotalWidth)/2.0f;
+	float xOffset = (3840 - ballsTotalWidth)/2.0f;
 
 	int y = yOffset;
 	int c = 0;
+
+	// spawn particles
 	for (unsigned int i = 0; i < _particleCount; i++)
 	{
 
@@ -61,27 +63,26 @@ void ParticleSystem::update()
 		// calc all gravity forces
 		calculateGravity();
 
-		int i = 0;
-		for (Particle &particle : currentBuffer) {
 
+		for (int i = 0; i < currentBuffer.size(); i++) {
+			Particle& particle = currentBuffer[i];
 			float colorMomentum = glm::length(glm::fvec2(particle.velocity));
 			float scaledMomentum = (colorMomentum / 100);
-			particle.color = glm::vec3(scaledMomentum, 0.0f, 1-scaledMomentum);
-		
+			particle.color = glm::vec3(scaledMomentum, 0.0f, 1 - scaledMomentum);
+
 			particle.velocity += particle.acceleration * _timestep;
 			particle.position += particle.velocity * _timestep;
 
-			i++;
-
-			//std::cout << "position: (" << particle.position.x << ", " << particle.position.y << ")\n";
 		}
 
-		i = 0;
-		for (Particle& particle : currentBuffer) {
+
+		for (int i = 0; i < currentBuffer.size(); i++) {
+			Particle& particle = currentBuffer[i];
 			particleCollisionTest(particle, i);
 			wallCollisionTest(particle);
-			i++;
+
 		}
+
 
 		_readBuffer = currentBuffer;
 
@@ -98,8 +99,6 @@ void ParticleSystem::update()
 		drawingBuffer[15].velocity.x = 50;
 		once = true;
 	}
-
-
 
 
 }
@@ -124,10 +123,10 @@ void ParticleSystem::calculateGravity()
 			particle.acceleration -= force / particle.weight;
 		}
 
-		glm::vec2 gravityPoint = glm::vec2(1920 / 2.0f, 1080 / 2.0f);
+		glm::vec2 gravityPoint = glm::vec2(3840 / 2.0f, 2160 / 2.0f);
 		glm::vec2 gravityPointDirection = glm::normalize(gravityPoint - currentParticle.position);
 
-		glm::vec2 force = gravityPointDirection * gravity*10.0f;
+		glm::vec2 force = gravityPointDirection * gravity;
 		currentParticle.acceleration += force;
 
 		i++;
@@ -140,19 +139,13 @@ void ParticleSystem::particleCollisionTest(Particle& currentParticle, unsigned i
 
 	auto& currentBuffer = _particleBuffers[0];
 
+	// start at i because we've already handled the other particles
 	for (int x = i + 1; x < _particleCount; x++)
 	{
 		Particle& particle = currentBuffer[x];
 
-
-		if (&particle == &currentParticle) {
-			continue;
-		}
-
 		float dist = glm::distance(currentParticle.position, particle.position);
 
-
-		
 		float radiusSum = (currentParticle.size / 2) + (particle.size / 2);
 
 		if (dist <= radiusSum) {
@@ -161,12 +154,11 @@ void ParticleSystem::particleCollisionTest(Particle& currentParticle, unsigned i
 		}
 	}
 
-
 }
 
 void ParticleSystem::handleParticleCollision(Particle& particleA, Particle& particleB, float correction)
 {
-	float restitution = 0.9f;
+	float restitution = 0.90f;
 	glm::fvec2 normal = glm::normalize(particleA.position - particleB.position);
 
 
@@ -198,7 +190,6 @@ void ParticleSystem::wallCollisionTest(Particle &particle)
 		float restitution = 0.9f;
 
 	if (particle.position.y-(particle.size/2) < bottomWall.y) {
-		//std::cout << "particle velocity: (" << particle.velocity.x << ", " << particle.velocity.y << ")\n";
 		particle.velocity = glm::reflect(particle.velocity* restitution, glm::vec2(0, 1));
 		particle.position.y = bottomWall.y + (particle.size / 2) + 0.5f;
 	}
@@ -214,7 +205,6 @@ void ParticleSystem::wallCollisionTest(Particle &particle)
 	}
 
 	if (particle.position.x + (particle.size / 2) > rightWall.x) {
-		//std::cout << "particle velocity: (" << particle.velocity.x << ", " << particle.velocity.y << ")\n";
 		particle.velocity = glm::reflect(particle.velocity* restitution, glm::vec2(-1, 0));
 		particle.position.x = rightWall.x - (particle.size / 2) - 0.5f;
 	}

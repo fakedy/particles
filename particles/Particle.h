@@ -9,6 +9,6 @@ struct Particle {
 	glm::fvec3 color{1.0, 1.0, 1.0};
 	glm::fvec2 velocity{0.0, 0.0};
 	glm::fvec2 acceleration{ 0.0, 0.0 };
-	float weight{ 10.0f };
+	float weight{ 1.0f };
 
 };
